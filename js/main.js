@@ -24,7 +24,7 @@ function getAuthHeaders() {
 
 async function fetchInitialStock() {
     try {
-        const res = await fetch('http://82.223.116.193:3001/api/stock', {
+        const res = await fetch('https://melonie-intersociety-unfaintly.ngrok-free.dev/api/stock', {
             headers: getAuthHeaders()
         });
 
