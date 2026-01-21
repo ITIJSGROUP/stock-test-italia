@@ -63,7 +63,7 @@ function renderTable(filteredData = null) {
     pageData.forEach(item => {
         let bgColor, dotColor, textColor, label, borderColor;
 
-        if (item.stock > 50) {
+        if (item.stock > 2) {
             label = 'Disponibilità';
             bgColor = 'bg-green-50 dark:bg-green-900/30';
             dotColor = 'bg-green-500';
