@@ -2,10 +2,6 @@ let stockData = [];
 let currentPage = 1;
 let rowsPerPage = 25;
 
-// Variables para Auth
-let apiUser = '';
-let apiPass = '';
-
 const tableBody = document.getElementById('table-body');
 const searchInput = document.getElementById('search');
 const rowsSelect = document.querySelector('select.form-select');
@@ -15,45 +11,41 @@ function normalize(str) {
     return str.toLowerCase().replace(/[\s\-\.,]/g, '');
 }
 
-function getAuthHeaders() {
-    if (apiUser && apiPass) {
-        return { 'Authorization': 'Basic ' + btoa(`${apiUser}:${apiPass}`) };
-    }
-    return {};
-}
-
+// 🔥 ACTUALIZA ESTA URL CON TU NUEVA URL DE NGROK
 const API_URL = 'https://melonie-intersociety-unfaintly.ngrok-free.dev/api/stock';
 
 async function fetchInitialStock() {
     try {
+        console.log('🔄 Cargando datos desde:', API_URL);
+
         const res = await fetch(API_URL, {
             headers: {
-                ...getAuthHeaders(),
                 'ngrok-skip-browser-warning': 'true'
             }
         });
 
-        if (res.status === 401) {
-            const user = prompt("Usuario Requerido:");
-            const pass = prompt("Contraseña Requerida:");
-            if (user && pass) {
-                apiUser = user;
-                apiPass = pass;
-                return fetchInitialStock();
-            } else {
-                alert("No se puede cargar los datos sin credenciales.");
-                return;
-            }
+        if (!res.ok) {
+            throw new Error(`Error ${res.status}: ${res.statusText}`);
         }
 
-        if (!res.ok) throw new Error('Error en la API');
-
         stockData = await res.json();
+        console.log('✅ Datos cargados:', stockData.length, 'productos');
+
         renderTable();
         setupSearch();
         setupRowsPerPage();
     } catch (err) {
-        console.error('Error al cargar stock:', err);
+        console.error('❌ Error al cargar stock:', err);
+        alert('Error al cargar datos del servidor. Revisa la consola (F12) para más detalles.');
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="p-8 text-center text-red-600">
+                    <span class="material-symbols-outlined text-5xl mb-2">error</span>
+                    <p class="font-semibold">Error al cargar los datos</p>
+                    <p class="text-sm text-gray-500 mt-2">${err.message}</p>
+                </td>
+            </tr>
+        `;
     }
 }
 
@@ -135,7 +127,7 @@ function setupSearch() {
             item.oems.some(o => normalize(o).includes(normalize(value))) ||
             item._cross.some(c => normalize(c).includes(normalize(value)))
         );
-        renderTable(filtered.slice(0, 5));
+        renderTable(filtered);
     });
 }
 
