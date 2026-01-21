@@ -166,16 +166,37 @@ function setupRowsPerPage() {
 
 function renderPagination(totalRows) {
     const totalPages = Math.ceil(totalRows / rowsPerPage);
-    paginationContainer.innerHTML = '';
+    const container = paginationContainer;
+    container.innerHTML = '';
 
-    for (let i = 1; i <= totalPages; i++) {
-        paginationContainer.innerHTML += `
-            <button onclick="changePage(${i})"
-              class="${i === currentPage ? 'bg-primary text-white' : ''}">
-              ${i}
-            </button>
-        `;
+    container.innerHTML += `
+    <button class="h-8 w-8 flex items-center justify-center rounded text-[#617589] dark:text-[#9ca3af] hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+      ${currentPage === 1 ? 'disabled' : ''}
+      onclick="changePage(${currentPage - 1})">
+      <span class="material-symbols-outlined text-lg">chevron_left</span>
+    </button>
+  `;
+
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + 4);
+
+    for (let i = startPage; i <= endPage; i++) {
+        container.innerHTML += `
+      <button onclick="changePage(${i})"
+        class="h-8 w-8 flex items-center justify-center rounded text-sm font-medium
+        ${i === currentPage ? 'bg-primary text-white' : 'text-[#111418] dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}">
+        ${i}
+      </button>
+    `;
     }
+
+    container.innerHTML += `
+    <button class="h-8 w-8 flex items-center justify-center rounded text-[#617589] dark:text-[#9ca3af] hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+      ${currentPage === totalPages ? 'disabled' : ''}
+      onclick="changePage(${currentPage + 1})">
+      <span class="material-symbols-outlined text-lg">chevron_right</span>
+    </button>
+  `;
 }
 
 function changePage(page) {
