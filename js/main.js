@@ -19,7 +19,9 @@ async function fetchInitialStock() {
         console.log('🔄 Cargando datos desde:', API_URL);
 
         const res = await fetch(API_URL, {
-            credentials: 'include' // necesario para que el navegador maneje la auth
+            headers: {
+                'ngrok-skip-browser-warning': 'true'
+            }
         });
 
         if (!res.ok) {
@@ -32,9 +34,11 @@ async function fetchInitialStock() {
         renderTable();
         setupSearch();
         setupRowsPerPage();
+
     } catch (err) {
         console.error('❌ Error al cargar stock:', err);
         alert('Error al cargar datos del servidor. Revisa la consola (F12) para más detalles.');
+
         tableBody.innerHTML = `
             <tr>
                 <td colspan="4" class="p-8 text-center text-red-600">
