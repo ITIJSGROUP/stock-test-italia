@@ -58,6 +58,7 @@ function renderTable(filteredData = null) {
     pageData.forEach(item => {
         let bgColor, dotColor, textColor, label, borderColor;
 
+        // Logic for Italian Stock
         if (item.stock > 2) {
             label = 'Disponibilità';
             bgColor = 'bg-green-50 dark:bg-green-900/30';
@@ -76,6 +77,30 @@ function renderTable(filteredData = null) {
             dotColor = 'bg-red-500';
             textColor = 'text-red-700 dark:text-red-300';
             borderColor = 'border-red-500 dark:border-red-500';
+        }
+
+        // Logic for Spanish Stock
+        let labelEs, bgColorEs, dotColorEs, textColorEs, borderColorEs;
+        const stockEs = Number(item.stock_es || 0);
+
+        if (stockEs > 2) {
+            labelEs = 'Disponibilità';
+            bgColorEs = 'bg-green-50 dark:bg-green-900/30';
+            dotColorEs = 'bg-green-500';
+            textColorEs = 'text-green-700 dark:text-green-300';
+            borderColorEs = 'border-green-500 dark:border-green-500';
+        } else if (stockEs > 0) {
+            labelEs = 'Scorte basse';
+            bgColorEs = 'bg-yellow-50 dark:bg-yellow-900/30';
+            dotColorEs = 'bg-yellow-500';
+            textColorEs = 'text-yellow-700 dark:text-yellow-300';
+            borderColorEs = 'border-yellow-500 dark:border-yellow-500';
+        } else {
+            labelEs = 'Esaurito';
+            bgColorEs = 'bg-red-50 dark:bg-red-900/30';
+            dotColorEs = 'bg-red-500';
+            textColorEs = 'text-red-700 dark:text-red-300';
+            borderColorEs = 'border-red-500 dark:border-red-500';
         }
 
         html += `
@@ -103,9 +128,9 @@ function renderTable(filteredData = null) {
             </td>
 
             <td class="p-4">
-                <div class="inline-flex items-center gap-2 px-2 py-1 rounded-full border ${item.stock_es > 2 ? 'bg-green-50 dark:bg-green-900/30 border-green-500 dark:border-green-500' : item.stock_es > 0 ? 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-500 dark:border-yellow-500' : 'bg-red-50 dark:bg-red-900/30 border-red-500 dark:border-red-500'}">
-                    <div class="w-1.5 h-1.5 rounded-full ${item.stock_es > 2 ? 'bg-green-500' : item.stock_es > 0 ? 'bg-yellow-500' : 'bg-red-500'}"></div>
-                    <span class="text-xs ${item.stock_es > 2 ? 'text-green-700 dark:text-green-300' : item.stock_es > 0 ? 'text-yellow-700 dark:text-yellow-300' : 'text-red-700 dark:text-red-300'}">${item.stock_es > 2 ? 'Disponibilità' : item.stock_es > 0 ? 'Scorte basse' : 'Esaurito'}</span>
+                <div class="inline-flex items-center gap-2 px-2 py-1 rounded-full border ${bgColorEs} ${borderColorEs}">
+                    <div class="w-1.5 h-1.5 rounded-full ${dotColorEs}"></div>
+                    <span class="text-xs ${textColorEs}">${labelEs}</span>
                 </div>
             </td>
         </tr>
