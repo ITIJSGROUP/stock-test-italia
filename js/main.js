@@ -22,21 +22,22 @@ function getAuthHeaders() {
     return {};
 }
 
+const API_URL = 'https://melonie-intersociety-unfaintly.ngrok-free.dev/api/stock';
+
 async function fetchInitialStock() {
     try {
-        const res = await fetch('https://melonie-intersociety-unfaintly.ngrok-free.dev', {
-            headers: getAuthHeaders()
+        const res = await fetch(API_URL, {
+            headers: getAuthHeaders(),
+            'ngrok-skip-browser-warning': 'true'
         });
 
         if (res.status === 401) {
-            // Pedir credenciales
-            const user = prompt("Usuario Requerido (ej: IJSGROUP):");
-            const pass = prompt("Contraseña Requerida (ej: 1234):"); // Nota: prompt muestra texto plano, idealmente usar input type password en modal
-
+            const user = prompt("Usuario Requerido:");
+            const pass = prompt("Contraseña Requerida:");
             if (user && pass) {
                 apiUser = user;
                 apiPass = pass;
-                return fetchInitialStock(); // Reintentar
+                return fetchInitialStock();
             } else {
                 alert("No se puede cargar los datos sin credenciales.");
                 return;
@@ -45,8 +46,7 @@ async function fetchInitialStock() {
 
         if (!res.ok) throw new Error('Error en la API');
 
-        const data = await res.json();
-        stockData = data;
+        stockData = await res.json();
         renderTable();
         setupSearch();
         setupRowsPerPage();
