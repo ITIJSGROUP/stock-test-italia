@@ -19,9 +19,7 @@ async function fetchInitialStock() {
         console.log('🔄 Cargando datos desde:', API_URL);
 
         const res = await fetch(API_URL, {
-            headers: {
-                'ngrok-skip-browser-warning': 'true'
-            }
+            credentials: 'include' // necesario para que el navegador maneje la auth
         });
 
         if (!res.ok) {
