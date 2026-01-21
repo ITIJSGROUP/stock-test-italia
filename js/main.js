@@ -7,11 +7,10 @@ const searchInput = document.getElementById('search');
 const rowsSelect = document.querySelector('select.form-select');
 const paginationContainer = document.querySelector('.flex.items-center.gap-1');
 
-function normalize(str) {
+function normalize(str = '') {
     return str.toLowerCase().replace(/[\s\-\.,]/g, '');
 }
 
-// 🔥 ACTUALIZA ESTA URL CON TU NUEVA URL DE NGROK
 const API_URL = 'https://melonie-intersociety-unfaintly.ngrok-free.dev/api/stock';
 
 async function fetchInitialStock() {
@@ -19,10 +18,7 @@ async function fetchInitialStock() {
         console.log('🔄 Cargando datos desde:', API_URL);
 
         const res = await fetch(API_URL, {
-            headers: {
-                'ngrok-skip-browser-warning': 'true'
-            },
-            credentials: 'include' // permite enviar cookies / auth
+            credentials: 'include' // ✅ correcto (si usas cookies / auth)
         });
 
         if (!res.ok) {
@@ -38,11 +34,10 @@ async function fetchInitialStock() {
 
     } catch (err) {
         console.error('❌ Error al cargar stock:', err);
-        alert('Error al cargar datos del servidor. Revisa la consola (F12) para más detalles.');
 
         tableBody.innerHTML = `
             <tr>
-                <td colspan="4" class="p-8 text-center text-red-600">
+                <td colspan="5" class="p-8 text-center text-red-600">
                     <span class="material-symbols-outlined text-5xl mb-2">error</span>
                     <p class="font-semibold">Error al cargar los datos</p>
                     <p class="text-sm text-gray-500 mt-2">${err.message}</p>
@@ -84,35 +79,35 @@ function renderTable(filteredData = null) {
         }
 
         html += `
-        <tr class="hover:bg-gray-50 dark:hover:bg-[#202e3b] group/row transition-colors">
-        <td class="p-4 align-middle">
-            <input class="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4" type="checkbox" />
-        </td>
-        <td class="p-4 align-middle">
-            <div class="flex flex-col">
-            <span class="text-[#111418] dark:text-white font-semibold text-sm">${item.product}</span>
-            <span class="text-[#617589] dark:text-[#9ca3af] text-xs">SKU: ${item.sku}</span>
-            
-            ${item.oems?.length ? `
-            <span class="text-[11px] text-[#9ca3af] mt-0.5">
-                OEM: ${item.oems[0]}
-                ${item.oems.length > 1 ? ` <span class="opacity-60">(+${item.oems.length - 1})</span>` : ''}
-            </span>
-` : ''}
+        <tr class="hover:bg-gray-50 dark:hover:bg-[#202e3b] transition-colors">
+            <td class="p-4"><input type="checkbox" /></td>
 
-            </div>
-        </td>
-        <td class="p-4 align-middle">
-            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border ${bgColor} ${borderColor}">
-            <div class="w-1.5 h-1.5 rounded-full ${dotColor}"></div>
-            <span class="text-xs font-medium ${textColor}">${label}</span>
-            </div>
-        </td>
-        <td class="p-4 align-middle text-right">
-            <button class="text-gray-400 hover:text-primary transition-colors p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800">
-            <span class="material-symbols-outlined">more_vert</span>
-            </button>
-        </td>
+            <td class="p-4">
+                <div class="flex flex-col">
+                    <span class="font-semibold text-sm">${item.product}</span>
+                    <span class="text-xs text-gray-500">SKU: ${item.sku}</span>
+                    ${item.oems?.length ? `
+                        <span class="text-[11px] text-gray-400">
+                            OEM: ${item.oems[0]}
+                            ${item.oems.length > 1 ? `(+${item.oems.length - 1})` : ''}
+                        </span>
+                    ` : ''}
+                </div>
+            </td>
+
+            <td class="p-4">
+                <div class="inline-flex items-center gap-2 px-2 py-1 rounded-full border ${bgColor} ${borderColor}">
+                    <div class="w-1.5 h-1.5 rounded-full ${dotColor}"></div>
+                    <span class="text-xs ${textColor}">${label}</span>
+                </div>
+            </td>
+
+            <td class="p-4">
+                <div class="inline-flex items-center gap-2 px-2 py-1 rounded-full border ${item.stock_es > 2 ? 'bg-green-50 dark:bg-green-900/30 border-green-500 dark:border-green-500' : item.stock_es > 0 ? 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-500 dark:border-yellow-500' : 'bg-red-50 dark:bg-red-900/30 border-red-500 dark:border-red-500'}">
+                    <div class="w-1.5 h-1.5 rounded-full ${item.stock_es > 2 ? 'bg-green-500' : item.stock_es > 0 ? 'bg-yellow-500' : 'bg-red-500'}"></div>
+                    <span class="text-xs ${item.stock_es > 2 ? 'text-green-700 dark:text-green-300' : item.stock_es > 0 ? 'text-yellow-700 dark:text-yellow-300' : 'text-red-700 dark:text-red-300'}">${item.stock_es > 2 ? 'Disponibilità' : item.stock_es > 0 ? 'Scorte basse' : 'Esaurito'}</span>
+                </div>
+            </td>
         </tr>
         `;
     });
@@ -124,12 +119,14 @@ function renderTable(filteredData = null) {
 function setupSearch() {
     searchInput.addEventListener('input', e => {
         currentPage = 1;
-        const value = e.target.value.toLowerCase();
+        const value = normalize(e.target.value);
+
         const filtered = stockData.filter(item =>
-            normalize(item.sku).includes(normalize(value)) ||
-            item.oems.some(o => normalize(o).includes(normalize(value))) ||
-            item._cross.some(c => normalize(c).includes(normalize(value)))
+            normalize(item.sku).includes(value) ||
+            (item.oems || []).some(o => normalize(o).includes(value)) ||
+            (item._cross || []).some(c => normalize(c).includes(value))
         );
+
         renderTable(filtered);
     });
 }
@@ -144,37 +141,16 @@ function setupRowsPerPage() {
 
 function renderPagination(totalRows) {
     const totalPages = Math.ceil(totalRows / rowsPerPage);
-    const container = paginationContainer;
-    container.innerHTML = '';
+    paginationContainer.innerHTML = '';
 
-    container.innerHTML += `
-    <button class="h-8 w-8 flex items-center justify-center rounded text-[#617589] dark:text-[#9ca3af] hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-      ${currentPage === 1 ? 'disabled' : ''}
-      onclick="changePage(${currentPage - 1})">
-      <span class="material-symbols-outlined text-lg">chevron_left</span>
-    </button>
-  `;
-
-    let startPage = Math.max(1, currentPage - 2);
-    let endPage = Math.min(totalPages, startPage + 4);
-
-    for (let i = startPage; i <= endPage; i++) {
-        container.innerHTML += `
-      <button onclick="changePage(${i})"
-        class="h-8 w-8 flex items-center justify-center rounded text-sm font-medium
-        ${i === currentPage ? 'bg-primary text-white' : 'text-[#111418] dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}">
-        ${i}
-      </button>
-    `;
+    for (let i = 1; i <= totalPages; i++) {
+        paginationContainer.innerHTML += `
+            <button onclick="changePage(${i})"
+              class="${i === currentPage ? 'bg-primary text-white' : ''}">
+              ${i}
+            </button>
+        `;
     }
-
-    container.innerHTML += `
-    <button class="h-8 w-8 flex items-center justify-center rounded text-[#617589] dark:text-[#9ca3af] hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-      ${currentPage === totalPages ? 'disabled' : ''}
-      onclick="changePage(${currentPage + 1})">
-      <span class="material-symbols-outlined text-lg">chevron_right</span>
-    </button>
-  `;
 }
 
 function changePage(page) {
@@ -182,5 +158,5 @@ function changePage(page) {
     renderTable();
 }
 
-// Iniciar
+// 🚀 Iniciar
 fetchInitialStock();
