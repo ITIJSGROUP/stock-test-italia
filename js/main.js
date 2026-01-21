@@ -15,8 +15,6 @@ const API_URL = 'https://melonie-intersociety-unfaintly.ngrok-free.dev/api/stock
 
 async function fetchInitialStock() {
     try {
-        console.log('🔄 Cargando datos desde:', API_URL);
-
         const res = await fetch(API_URL, {
             credentials: 'include' // ✅ correcto (si usas cookies / auth)
         });
@@ -26,8 +24,6 @@ async function fetchInitialStock() {
         }
 
         stockData = await res.json();
-        console.log('✅ Datos cargados:', stockData.length, 'productos');
-
         renderTable();
         setupSearch();
         setupRowsPerPage();
