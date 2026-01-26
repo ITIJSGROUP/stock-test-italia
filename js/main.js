@@ -16,7 +16,6 @@ const API_URL = 'https://melonie-intersociety-unfaintly.ngrok-free.dev/api/stock
 async function fetchInitialStock() {
     try {
         const res = await fetch(API_URL, {
-            credentials: 'include' // ✅ correcto (si usas cookies / auth)
         });
 
         if (!res.ok) {
