@@ -13,9 +13,14 @@ function normalize(str = '') {
 
 const API_URL = 'https://melonie-intersociety-unfaintly.ngrok-free.dev/api/stock';
 
+console.log('URL usada:', API_URL);
+
 async function fetchInitialStock() {
     try {
         const res = await fetch(API_URL, {
+            headers: {
+                'ngrok-skip-browser-warning': 'true'
+            }
         });
 
         if (!res.ok) {
